@@ -38,6 +38,11 @@ app.post("/login", (req, res, next) => {
         if (!user) {
             return res.redirect("/login")
         }
+        if (user.userType !== req.body.userRole) {
+            // User role does not match the userType
+            req.flash('error', "Login doesn't exist under user type")
+            return res.redirect("/login")
+        }
         req.logIn(user, (err) => {
             if (err) {
                 return next(err)
@@ -50,7 +55,7 @@ app.post("/login", (req, res, next) => {
                 return res.redirect("/login")
             }
         })
-    }) (req, res, next)
+    })(req, res, next)
 })
 
 // configuring the register post functionality
