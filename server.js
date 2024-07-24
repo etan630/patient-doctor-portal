@@ -10,6 +10,7 @@ const passport = require("passport")
 const initializePassport = require("./passport-config")
 const flash = require("express-flash")
 const session = require("express-session")
+const methodOverride = require("method-override")
 
 initializePassport(
     passport, 
@@ -28,14 +29,16 @@ app.use(session({
 }))
 app.use(passport.initialize())
 app.use(passport.session())
+app.use(methodOverride("_method"))
 
 // configuring the login post functionality
-app.post("/login", (req, res, next) => {
+app.post("/login", checkNotAuthenticated, (req, res, next) => {
     passport.authenticate("local", (err, user, info) => {
         if (err) {
             return next(err)
         }
         if (!user) {
+            req.flash('error', "Invalid email or password")
             return res.redirect("/login")
         }
         if (user.userType !== req.body.userRole) {
@@ -59,7 +62,7 @@ app.post("/login", (req, res, next) => {
 })
 
 // configuring the register post functionality
-app.post("/register", async (req, res) => {
+app.post("/register", checkNotAuthenticated, async (req, res) => {
     try {
         const hashedPassword = await bcrypt.hash(req.body.password, 10)
         users.push({
@@ -78,22 +81,54 @@ app.post("/register", async (req, res) => {
 })
 
 // Routes
-app.get('/doctor', (req, res) =>{
-    res.render("doctor.ejs")
+app.get('/doctor', checkAuthenticated, (req, res) =>{
+    res.render("doctor.ejs", {name: req.user.name})
 })
 
-app.get('/login', (req, res) => {
+app.get('/patient', checkAuthenticated, (req, res) => {
+    res.render("patient.ejs", {name: req.user.name})
+})
+
+app.get('/login', checkNotAuthenticated, (req, res) => {
     res.render("login.ejs")
 })
 
-app.get('/register', (req, res) => {
+app.get('/register', checkNotAuthenticated, (req, res) => {
     res.render("register.ejs")
 })
 
-app.get('/patient', (req, res) => {
-    res.render("patient.ejs")
-})
 // End Routes
 
+app.delete("/logout", (req, res, next) => {
+    const userType = req.user ? req.user.userType : null;
+    req.logout(err => {
+        if (err) return next(err);
+        if (userType === "doctor") {
+            return res.redirect("/doctor");
+        } else if (userType === "patient") {
+            return res.redirect("/patient");
+        } else {
+            return res.redirect("/login");
+        }
+    });
+})
+
+function checkAuthenticated(req, res, next){
+    if(req.isAuthenticated()) {
+        return next()
+    }
+    res.redirect("/login")
+}
+
+function checkNotAuthenticated(req, res, next){
+    if(req.isAuthenticated()) {
+        if (req.user.userType === "doctor") {
+            return res.redirect("/doctor")
+        } else if (req.user.userType === "patient") {
+            return res.redirect("/patient")
+        }
+    }
+    next()
+}
 
 app.listen(3000)
