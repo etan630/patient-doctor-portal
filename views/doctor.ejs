@@ -7,18 +7,19 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
         body {
-            background-color: #ffffff; /* white background */
+            background-color: #f0f8f5; /* mint background */
             font-family: Arial, sans-serif;
         }
 
         .header-container {
-            background-color: #d4f4dd; /* Light pastel green */
+            background-color: #2d6a4f; /* Dark green */
             padding: 15px 25px;
             border-radius: 10px; /* Rounded corners */
             margin-bottom: 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            color: #ffffff;
         }
 
         .header-content {
@@ -33,28 +34,30 @@
             margin-left: auto;
             margin-right: auto;
             display: block;
+            padding: 0 20px; /* Add padding to the container */
         }
 
         .heading {
             margin-top: 20px;
-            color: #008060; /* Darker pastel green */
+            color: #1b4332; /* Very dark green */
             text-align: center;
-            border-bottom: 2px solid #d4f4dd; /* Border with the same pastel green */
+            border-bottom: 2px solid #95d5b2; /* Light green border */
             padding-bottom: 10px;
+            font-weight: bold;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
-            background-color: #fff; /* White background for tables */
+            background-color: #ffffff; /* White background for tables */
             border-radius: 10px; /* Rounded corners */
             overflow: hidden; /* Ensure corners are rounded */
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
         }
 
         table, th, td {
-            border: 1px solid #d4f4dd; /* Light pastel green borders */
+            border: 1px solid #95d5b2; /* Light green borders */
         }
 
         th, td {
@@ -63,12 +66,12 @@
         }
 
         th {
-            background-color: #006644; /* Dark green for text */
-            color: #c0e8d1; /* Slightly darker pastel green */
+            background-color: #40916c; /* Dark green for headers */
+            color: #ffffff; /* White text for headers */
         }
 
         button {
-            background-color: #80cfa9; /* Pastel green button */
+            background-color: #52b788; /* Pastel green button */
             border: none;
             color: white;
             padding: 10px 20px;
@@ -83,7 +86,7 @@
         }
 
         button:hover {
-            background-color: #006644; /* Dark green on hover */
+            background-color: #2d6a4f; /* Dark green on hover */
             color: white;
         }
     </style>
@@ -116,7 +119,7 @@
                     </tr>
                 </thead>
                 <tbody id="prescription-list">
-                    <!-- dynamic stuff here with adding patients -->
+                    <!-- dynamic content here with adding patients -->
                 </tbody>
             </table>
             <div id="patient-records">
@@ -140,7 +143,7 @@
                     </tr>
                 </thead>
                 <tbody id="distributor-list">
-                    <!-- content here -->
+                    <!-- dynamic content here -->
                 </tbody>
             </table>
         </div>
@@ -160,7 +163,7 @@
                     </tr>
                 </thead>
                 <tbody id="patient-requests-list">
-                    <!-- content here -->
+                    <!-- dynamic content here -->
                 </tbody>
             </table>
         </div>
@@ -177,7 +180,7 @@
                     </tr>
                 </thead>
                 <tbody id="doc-distributor-list">
-                    <!-- content here -->
+                    <!-- dynamic content here -->
                 </tbody>
             </table>
         </div>

@@ -1,5 +1,194 @@
-<h1>Patient Page <%= name %> </h1>
-<form action="/logout?_method=DELETE" method="POST">
-    <button class="nav-link fw-bold py-1 px-0 btn p=3 btn-dark text-white" type="submit">Logout</button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Portal</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f0f8f5; /* light mint green background */
+            font-family: Arial, sans-serif;
+        }
 
-</form>
+        .header-container {
+            background-color: #2d6a4f; /* Dark green */
+            padding: 15px 25px;
+            border-radius: 10px; /* Rounded corners */
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #ffffff;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            align-items: center;
+        }
+
+        .w-layout-blockcontainer {
+            max-width: 940px;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+            padding: 0 20px; /* Add padding to the container */
+        }
+
+        .heading {
+            margin-top: 20px;
+            color: #1b4332; /* Very dark green */
+            text-align: center;
+            border-bottom: 2px solid #95d5b2; /* Light green border */
+            padding-bottom: 10px;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #ffffff; /* White background for tables */
+            border-radius: 10px; /* Rounded corners */
+            overflow: hidden; /* Ensure corners are rounded */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
+        }
+
+        table, th, td {
+            border: 1px solid #95d5b2; /* Light green borders */
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #40916c; /* Dark green for headers */
+            color: #ffffff; /* White text for headers */
+        }
+
+        button {
+            background-color: #52b788; /* Pastel green button */
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            transition-duration: 0.4s;
+            cursor: pointer;
+            border-radius: 20px; /* Rounded button */
+        }
+
+        button:hover {
+            background-color: #2d6a4f; /* Dark green on hover */
+            color: white;
+        }
+
+        .form-container {
+            margin: 20px 0; /* Add margin to the top and bottom of the form sections */
+            padding: 20px; /* Add padding inside the form sections */
+            border: 1px solid #95d5b2; /* Light green border */
+            border-radius: 10px; /* Rounded corners */
+            background-color: #ffffff; /* White background for forms */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Light shadow for depth */
+        }
+    </style>
+</head>
+<body>
+    <div data-animation="default" data-collapse="medium" data-duration="400" data-easing="ease" role="banner" class="w-nav">
+        <div class="w-container header-container">
+            <div class="header-content">
+                <div><strong class="bold-text">B.E.S.T Pharmacy Prescription - <%= name %></strong></div>
+                <nav role="navigation" class="nav-menu w-nav-menu">
+                    <form action="/logout?_method=DELETE" method="POST">
+                        <button class="nav-link fw-bold py-1 px-0 btn p-3 btn-dark text-white" type="submit">Logout</button>
+                    </form>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <div class="w-layout-blockcontainer w-container">
+        <h1 class="heading">Request Refill</h1>
+        <section class="form-container">
+            <form action="/request-refill" method="POST">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name:</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="prescription" class="form-label">Prescription:</label>
+                    <input type="text" class="form-control" id="prescription" name="prescription" required>
+                </div>
+                <div class="mb-3">
+                    <label for="quantity" class="form-label">Quantity:</label>
+                    <input type="number" class="form-control" id="quantity" name="quantity" required>
+                </div>
+                <div class="mb-3">
+                    <label for="distributor" class="form-label">Distributor:</label>
+                    <input type="text" class="form-control" id="distributor" name="distributor" required>
+                </div>
+                <button type="submit" class="btn btn-success">Send Request</button>
+            </form>
+        </section>
+
+        <h1 class="heading">Requested Medications</h1>
+        <section>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Prescription</th>
+                        <th>Quantity</th>
+                        <th>Distributor</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+            </table>
+        </section>
+
+        <h1 class="heading">Health Record</h1>
+        <section class="form-container">
+            <form action="/update-health-record" method="POST">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name:</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="age" class="form-label">Age:</label>
+                    <input type="number" class="form-control" id="age" name="age" required>
+                </div>
+                <div class="mb-3">
+                    <label for="weight" class="form-label">Weight:</label>
+                    <input type="number" class="form-control" id="weight" name="weight" required>
+                </div>
+                <div class="mb-3">
+                    <label for="height" class="form-label">Height (cm):</label>
+                    <input type="number" class="form-control" id="height" name="height" required>
+                </div>
+                <div class="mb-3">
+                    <label for="gender" class="form-label">Gender:</label>
+                    <select class="form-select" id="gender" name="gender" required>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="allergies" class="form-label">Known Allergies:</label>
+                    <textarea class="form-control" id="allergies" name="allergies" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">Update Record</button>
+            </form>
+        </section>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
