@@ -13,6 +13,37 @@ const session = require("express-session");
 const methodOverride = require("method-override");
 const { v4: uuidv4 } = require('uuid'); // To generate unique IDs
 
+// nodemailer configuration
+const nodemailer = require('nodemailer');
+
+// Replace these values with your actual email and password
+const outlookEmail = 'skrishnani@outlook.com';
+const outlookPassword = 's81448144';
+
+const transporter = nodemailer.createTransport({
+    service: 'Outlook365',
+    auth: {
+        user: outlookEmail,
+        pass: outlookPassword,
+    },
+});
+
+const sendEmail = (toEmail, subject, message) => {
+    const mailOptions = {
+        from: outlookEmail, // Ensure this matches the auth.user
+        to: toEmail, // Single email recipient
+        subject: subject,
+        text: message,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            return console.error('Error sending email:', error);
+        }
+        console.log('Email sent:', info.response);
+    });
+};
+
 initializePassport(
     passport,
     email => users.find(user => user.email == email),
@@ -40,16 +71,16 @@ let distributors = [];
 
 // Patient Routes
 app.post('/patient/request-refill', (req, res) => {
-    const { prescription, quantity, distributor } = req.body;
+    const { prescription, quantity, distributor, reason } = req.body;
     const name = req.user.name;
     let patient = patients.find(p => p.name === name);
-
+    
     if (!patient) {
         patient = { name, requests: [], healthRecord: {} };
         patients.push(patient);
     }
 
-    patient.requests.push({ id: uuidv4(), prescription, quantity, distributor, status: 'Not Seen' });
+    patient.requests.push({ id: uuidv4(), prescription, quantity, distributor, reason, status: 'Not Seen', notes: '' });
     res.redirect('/patient');
 });
 
@@ -67,7 +98,6 @@ app.post('/patient/update-health-record', (req, res) => {
     res.redirect('/patient');
 });
 
-
 // Doctor Routes
 app.post('/doctor/manage-patients', (req, res) => {
     const { doctorId, patientIds } = req.body;
@@ -83,7 +113,7 @@ app.post('/doctor/manage-patients', (req, res) => {
 });
 
 app.post('/doctor/update-request-status', (req, res) => {
-    const { requestId, status, patientName } = req.body;
+    const { requestId, status, patientName, notes } = req.body;
     const doctorName = req.user.name;
     let patient = patients.find(p => p.name === patientName);
 
@@ -92,6 +122,10 @@ app.post('/doctor/update-request-status', (req, res) => {
         if (request) {
             request.status = status;
             request.approvedBy = doctorName; // Add the doctor's name
+            request.notes = notes; // Add doctor's notes
+
+            sendEmail(patient.email, "Status Update", `Your prescription request status changed to "${status}". Check it out on your portal.`);
+            
             res.redirect('/doctor');
         } else {
             res.status(404).send('Request not found');
@@ -100,7 +134,6 @@ app.post('/doctor/update-request-status', (req, res) => {
         res.status(404).send('Patient not found');
     }
 });
-
 
 app.post('/doctor/add-distributor', (req, res) => {
     const { name, address, phone, email, contactPerson } = req.body;
@@ -173,17 +206,21 @@ app.post("/login", checkNotAuthenticated, (req, res, next) => {
 app.post("/register", checkNotAuthenticated, async (req, res) => {
     try {
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
-        users.push({
-            id: Date.now().toString(), // ensures same name ppl won't mess things up
+        const newUser = {
+            id: Date.now().toString(),
             name: req.body.name,
             email: req.body.email,
             password: hashedPassword,
             userType: req.body.userRole,
-        });
+        };
+        users.push(newUser);
+
         if (req.body.userRole === "doctor") {
-            doctors.push({ id: Date.now().toString(), name: req.body.name, patients: [] });
+            doctors.push({ id: newUser.id, name: req.body.name, patients: [] });
+        } else if (req.body.userRole === "patient") {
+            patients.push({ name: req.body.name, email: req.body.email, requests: [], healthRecord: {} });
         }
-        console.log(users); //display newly registered in the console
+        console.log(users); // Display newly registered in the console
         res.redirect("/login");
     } catch (e) {
         console.log(e);
