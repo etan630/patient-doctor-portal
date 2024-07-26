@@ -119,9 +119,9 @@
         <section class="form-container">
             <form action="/doctor/manage-patients" method="POST">
                 <input type="hidden" name="doctorId" value="<%= doctorId %>">
-                <% patients.forEach(function(patient) { %>
+                <% allPatients.forEach(function(patient) { %>
                     <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="patientIds" value="<%= patient.name %>">
+                        <input class="form-check-input" type="checkbox" name="patientIds" value="<%= patient.name %>" <% if (patients.map(p => p.name).includes(patient.name)) { %> checked <% } %>>
                         <label class="form-check-label" for="patientIds"><%= patient.name %></label>
                     </div>
                 <% }); %>
@@ -138,24 +138,23 @@
                         <th>Prescription</th>
                         <th>Quantity</th>
                         <th>Distributor</th>
-                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <% patients.forEach(function(patient) { %>
-                        <% patient.requests.forEach(function(request) { %>
+                        <% patient.requests.filter(request => request.status === 'Not Seen').forEach(function(request) { %>
                             <tr>
                                 <td><%= patient.name %></td>
                                 <td><%= request.prescription %></td>
                                 <td><%= request.quantity %></td>
                                 <td><%= request.distributor %></td>
-                                <td><%= request.status %></td>
                                 <td>
                                     <form action="/doctor/update-request-status" method="POST">
                                         <input type="hidden" name="requestId" value="<%= request.id %>">
                                         <input type="hidden" name="patientName" value="<%= patient.name %>">
                                         <select name="status" class="form-select" onchange="this.form.submit()">
+                                            <option value="Not Seen">None</option>
                                             <option value="Approved">Yes</option>
                                             <option value="Denied">No</option>
                                         </select>
@@ -166,6 +165,20 @@
                     <% }); %>
                 </tbody>
             </table>
+        </section>
+
+        <h1 class="heading">Patient Health Records</h1>
+        <section>
+            <% patients.forEach(function(patient) { %>
+                <div class="form-container">
+                    <h3>Health Record for <%= patient.name %></h3>
+                    <p><strong>Age:</strong> <%= patient.healthRecord.age %></p>
+                    <p><strong>Weight:</strong> <%= patient.healthRecord.weight %></p>
+                    <p><strong>Height(cm):</strong> <%= patient.healthRecord.height %></p>
+                    <p><strong>Gender:</strong> <%= patient.healthRecord.gender %></p>
+                    <p><strong>Allergies:</strong> <%= patient.healthRecord.allergies %></p>
+                </div>
+            <% }); %>
         </section>
 
         <h1 class="heading">Add Distributor</h1>
@@ -215,6 +228,32 @@
                             <td><%= distributor.phone %></td>
                             <td><%= distributor.email %></td>
                             <td><%= distributor.contactPerson %></td>
+                        </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </section>
+
+        <h1 class="heading">Documentation</h1>
+        <section>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Patient</th>
+                        <th>Prescription</th>
+                        <th>Quantity</th>
+                        <th>Distributor</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% allRequests.forEach(function(request) { %>
+                        <tr>
+                            <td><%= request.patientName %></td>
+                            <td><%= request.prescription %></td>
+                            <td><%= request.quantity %></td>
+                            <td><%= request.distributor %></td>
+                            <td><%= request.status %></td>
                         </tr>
                     <% }); %>
                 </tbody>

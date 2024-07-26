@@ -143,6 +143,7 @@
             <table>
                 <thead>
                     <tr>
+                        <th>Name</th>
                         <th>Prescription</th>
                         <th>Quantity</th>
                         <th>Distributor</th>
@@ -151,16 +152,15 @@
                 </thead>
                 <tbody>
                     <% patients.forEach(function(patient) { %>
-                        <% if (patient.name === name) { %>
-                            <% patient.requests.forEach(function(request) { %>
-                                <tr>
-                                    <td><%= request.prescription %></td>
-                                    <td><%= request.quantity %></td>
-                                    <td><%= request.distributor %></td>
-                                    <td><%= request.status %></td>
-                                </tr>
-                            <% }); %>
-                        <% } %>
+                        <% patient.requests.forEach(function(request) { %>
+                            <tr>
+                                <td><%= patient.name %></td>
+                                <td><%= request.prescription %></td>
+                                <td><%= request.quantity %></td>
+                                <td><%= request.distributor %></td>
+                                <td><%= request.status %></td>
+                            </tr>
+                        <% }); %>
                     <% }); %>
                 </tbody>
             </table>

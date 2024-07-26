@@ -14,9 +14,9 @@ const methodOverride = require("method-override");
 const { v4: uuidv4 } = require('uuid'); // To generate unique IDs
 
 initializePassport(
-    passport, 
+    passport,
     email => users.find(user => user.email == email),
-    id => users.find(user => user.id === id) 
+    id => users.find(user => user.id === id)
 );
 
 const users = [];
@@ -48,7 +48,7 @@ app.post('/patient/request-refill', (req, res) => {
         patients.push(patient);
     }
 
-    patient.requests.push({ id: uuidv4(), prescription, quantity, distributor, status: 'Pending' });
+    patient.requests.push({ id: uuidv4(), prescription, quantity, distributor, status: 'Not Seen' });
     res.redirect('/patient');
 });
 
@@ -71,7 +71,8 @@ app.post('/doctor/manage-patients', (req, res) => {
     let doctor = doctors.find(d => d.id === doctorId);
 
     if (doctor) {
-        doctor.patients = patientIds.map(id => patients.find(p => p.name === id));
+        const patientIdsArray = Array.isArray(patientIds) ? patientIds : [patientIds];
+        doctor.patients = patientIdsArray.map(id => patients.find(p => p.name === id));
         res.redirect('/doctor');
     } else {
         res.status(404).send('Doctor not found');
@@ -103,11 +104,20 @@ app.post('/doctor/add-distributor', (req, res) => {
 
 // Render pages
 app.get('/doctor', checkAuthenticated, (req, res) => {
+    const doctor = doctors.find(d => d.id === req.user.id);
+    const managedPatients = doctor ? doctor.patients : [];
+
+    const allRequests = managedPatients.flatMap(p => 
+        p.requests.map(r => ({ ...r, patientName: p.name }))
+    );
+
     res.render('doctor', {
         name: req.user.name,
         doctorId: req.user.id,
-        patients: patients,
-        distributors: distributors
+        patients: managedPatients,
+        allPatients: patients,
+        distributors: distributors,
+        allRequests: allRequests
     });
 });
 
@@ -164,6 +174,9 @@ app.post("/register", checkNotAuthenticated, async (req, res) => {
             password: hashedPassword,
             userType: req.body.userRole,
         });
+        if (req.body.userRole === "doctor") {
+            doctors.push({ id: Date.now().toString(), name: req.body.name, patients: [] });
+        }
         console.log(users); //display newly registered in the console
         res.redirect("/login");
     } catch (e) {
