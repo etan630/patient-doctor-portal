@@ -7,8 +7,44 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <style>
         body {
-            background-color: #ffffff; /* white background */
+            background-color: #f8f9fa; /* light gray background */
             font-family: Arial, sans-serif;
+        }
+
+        .sidebar {
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 230px;
+            background-color: #2d6a4f; /* Dark green */
+            padding-top: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .sidebar a {
+            padding: 15px 25px;
+            text-decoration: none;
+            font-size: 18px;
+            color: white;
+            display: block;
+        }
+
+        .sidebar a:hover {
+            background-color: #40916c; /* Slightly lighter green */
+        }
+
+        .sidebar .logout {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .content {
+            margin-left: 260px; /* Same width as the sidebar + some spacing */
+            padding: 20px;
         }
 
         .header-container {
@@ -27,14 +63,6 @@
             justify-content: space-between;
             width: 100%;
             align-items: center;
-        }
-
-        .w-layout-blockcontainer {
-            max-width: 940px;
-            margin-left: auto;
-            margin-right: auto;
-            display: block;
-            padding: 0 20px; /* Add padding to the container */
         }
 
         .heading {
@@ -101,36 +129,49 @@
     </style>
 </head>
 <body>
-    <div data-animation="default" data-collapse="medium" data-duration="400" data-easing="ease" role="banner" class="w-nav">
-        <div class="w-container header-container">
-            <div class="header-content">
-                <div><strong class="bold-text">B.E.S.T Pharmacy Prescription - <%= name %></strong></div>
-                <nav role="navigation" class="nav-menu w-nav-menu">
-                    <form action="/logout?_method=DELETE" method="POST">
-                        <button class="nav-link fw-bold py-1 px-0 btn p-3 btn-dark text-white" type="submit">Logout</button>
-                    </form>
-                </nav>
-            </div>
+    <div class="sidebar">
+        <div>
+            <a href="#manage-patients">Manage Patients</a>
+            <a href="#prescription-management">Prescription Management</a>
+            <a href="#patient-health-records">Patient Health Records</a>
+            <a href="#add-distributor">Add Distributor</a>
+            <a href="#distributor-list">Distributor List</a>
+            <a href="#documentation">Documentation</a>
+        </div>
+        <div class="logout">
+            <form action="/logout?_method=DELETE" method="POST">
+                <button class="nav-link fw-bold py-1 px-0 btn p-3 btn-dark text-white" type="submit">Logout</button>
+            </form>
         </div>
     </div>
 
-    <div class="w-layout-blockcontainer w-container">
-        <h1 class="heading">Manage Patients</h1>
-        <section class="form-container">
-            <form action="/doctor/manage-patients" method="POST">
-                <input type="hidden" name="doctorId" value="<%= doctorId %>">
-                <% allPatients.forEach(function(patient) { %>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="patientIds" value="<%= patient.name %>" <% if (patients.map(p => p.name).includes(patient.name)) { %> checked <% } %>>
-                        <label class="form-check-label" for="patientIds"><%= patient.name %></label>
-                    </div>
-                <% }); %>
-                <button type="submit" class="btn btn-success">Manage Patients</button>
-            </form>
+    <div class="content">
+        <div data-animation="default" data-collapse="medium" data-duration="400" data-easing="ease" role="banner" class="w-nav">
+            <div class="w-container header-container">
+                <div class="header-content">
+                    <div><strong class="bold-text">B.E.S.T Pharmacy Prescription - Welcome <%= name %></strong></div>
+                </div>
+            </div>
+        </div>
+
+        <section id="manage-patients">
+            <h1 class="heading">Manage Patients</h1>
+            <div class="form-container">
+                <form action="/doctor/manage-patients" method="POST">
+                    <input type="hidden" name="doctorId" value="<%= doctorId %>">
+                    <% allPatients.forEach(function(patient) { %>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="patientIds" value="<%= patient.name %>" <% if (patients.map(p => p.name).includes(patient.name)) { %> checked <% } %>>
+                            <label class="form-check-label" for="patientIds"><%= patient.name %></label>
+                        </div>
+                    <% }); %>
+                    <button type="submit" class="btn btn-success">Manage Patients</button>
+                </form>
+            </div>
         </section>
 
-        <h1 class="heading">Prescription Management</h1>
-        <section>
+        <section id="prescription-management">
+            <h1 class="heading">Prescription Management</h1>
             <table>
                 <thead>
                     <tr>
@@ -167,8 +208,8 @@
             </table>
         </section>
 
-        <h1 class="heading">Patient Health Records</h1>
-        <section>
+        <section id="patient-health-records">
+            <h1 class="heading">Patient Health Records</h1>
             <% patients.forEach(function(patient) { %>
                 <div class="form-container">
                     <h3>Health Record for <%= patient.name %></h3>
@@ -181,35 +222,37 @@
             <% }); %>
         </section>
 
-        <h1 class="heading">Add Distributor</h1>
-        <section class="form-container">
-            <form action="/doctor/add-distributor" method="POST">
-                <div class="mb-3">
-                    <label for="name" class="form-label">Name:</label>
-                    <input type="text" class="form-control" id="name" name="name" required>
-                </div>
-                <div class="mb-3">
-                    <label for="address" class="form-label">Address:</label>
-                    <input type="text" class="form-control" id="address" name="address" required>
-                </div>
-                <div class="mb-3">
-                    <label for="phone" class="form-label">Phone:</label>
-                    <input type="text" class="form-control" id="phone" name="phone" required>
-                </div>
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email:</label>
-                    <input type="email" class="form-control" id="email" name="email" required>
-                </div>
-                <div class="mb-3">
-                    <label for="contactPerson" class="form-label">Contact Person:</label>
-                    <input type="text" class="form-control" id="contactPerson" name="contactPerson" required>
-                </div>
-                <button type="submit" class="btn btn-success">Add Distributor</button>
-            </form>
+        <section id="add-distributor">
+            <h1 class="heading">Add Distributor</h1>
+            <div class="form-container">
+                <form action="/doctor/add-distributor" method="POST">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name:</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Address:</label>
+                        <input type="text" class="form-control" id="address" name="address" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Phone:</label>
+                        <input type="text" class="form-control" id="phone" name="phone" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email:</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="contactPerson" class="form-label">Contact Person:</label>
+                        <input type="text" class="form-control" id="contactPerson" name="contactPerson" required>
+                    </div>
+                    <button type="submit" class="btn btn-success">Add Distributor</button>
+                </form>
+            </div>
         </section>
 
-        <h1 class="heading">Distributor List</h1>
-        <section>
+        <section id="distributor-list">
+            <h1 class="heading">Distributor List</h1>
             <table>
                 <thead>
                     <tr>
@@ -234,8 +277,8 @@
             </table>
         </section>
 
-        <h1 class="heading">Documentation</h1>
-        <section>
+        <section id="documentation">
+            <h1 class="heading">Documentation</h1>
             <table>
                 <thead>
                     <tr>

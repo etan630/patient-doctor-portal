@@ -40,7 +40,8 @@ let distributors = [];
 
 // Patient Routes
 app.post('/patient/request-refill', (req, res) => {
-    const { name, prescription, quantity, distributor } = req.body;
+    const { prescription, quantity, distributor } = req.body;
+    const name = req.user.name;
     let patient = patients.find(p => p.name === name);
 
     if (!patient) {
@@ -53,7 +54,8 @@ app.post('/patient/request-refill', (req, res) => {
 });
 
 app.post('/patient/update-health-record', (req, res) => {
-    const { name, age, weight, height, gender, allergies } = req.body;
+    const { age, weight, height, gender, allergies } = req.body;
+    const name = req.user.name;
     let patient = patients.find(p => p.name === name);
 
     if (!patient) {
@@ -64,6 +66,7 @@ app.post('/patient/update-health-record', (req, res) => {
     patient.healthRecord = { age, weight, height, gender, allergies };
     res.redirect('/patient');
 });
+
 
 // Doctor Routes
 app.post('/doctor/manage-patients', (req, res) => {
@@ -81,12 +84,14 @@ app.post('/doctor/manage-patients', (req, res) => {
 
 app.post('/doctor/update-request-status', (req, res) => {
     const { requestId, status, patientName } = req.body;
+    const doctorName = req.user.name;
     let patient = patients.find(p => p.name === patientName);
 
     if (patient) {
         let request = patient.requests.find(r => r.id === requestId);
         if (request) {
             request.status = status;
+            request.approvedBy = doctorName; // Add the doctor's name
             res.redirect('/doctor');
         } else {
             res.status(404).send('Request not found');
@@ -95,6 +100,7 @@ app.post('/doctor/update-request-status', (req, res) => {
         res.status(404).send('Patient not found');
     }
 });
+
 
 app.post('/doctor/add-distributor', (req, res) => {
     const { name, address, phone, email, contactPerson } = req.body;
