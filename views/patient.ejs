@@ -126,6 +126,13 @@
             background-color: #ffffff;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
+
+        .section-heading {
+            color: #1b4332;
+            border-bottom: 2px solid #95d5b2;
+            padding-bottom: 10px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -144,38 +151,36 @@
     </div>
 
     <div class="content">
-        <div data-animation="default" data-collapse="medium" data-duration="400" data-easing="ease" role="banner" class="w-nav">
-            <div class="w-container header-container">
-                <div class="header-content">
-                    <div><strong class="bold-text">B.E.S.T Pharmacy Prescription - Welcome <%= name %></strong></div>
-                </div>
+        <div class="header-container">
+            <div class="header-content">
+                <div><strong class="bold-text">B.E.S.T Pharmacy Prescription - Welcome <%= name %></strong></div>
             </div>
         </div>
 
         <section id="request-refill">
-            <h1 class="heading">Request Refill</h1>
+            <h2 class="section-heading">Request Refill</h2>
             <div class="form-container">
                 <form action="/patient/request-refill" method="POST">
                     <div class="mb-3">
-                        <label for="prescription" class="form-label">Prescription:</label>
+                        <label for="prescription" class="form-label">Prescription</label>
                         <input type="text" class="form-control" id="prescription" name="prescription" required>
                     </div>
                     <div class="mb-3">
-                        <label for="quantity" class="form-label">Quantity:</label>
+                        <label for="quantity" class="form-label">Quantity</label>
                         <input type="number" class="form-control" id="quantity" name="quantity" required>
                     </div>
                     <div class="mb-3">
-                        <label for="distributor" class="form-label">Distributor:</label>
+                        <label for="distributor" class="form-label">Distributor</label>
                         <input type="text" class="form-control" id="distributor" name="distributor" required>
                     </div>
-                    <button type="submit" class="btn btn-success">Send Request</button>
+                    <button type="submit" class="btn btn-success w-100">Send Request</button>
                 </form>
             </div>
         </section>
 
         <section id="requested-medications">
-            <h1 class="heading">Requested Medications</h1>
-            <table>
+            <h2 class="section-heading">Requested Medications</h2>
+            <table class="table table-hover">
                 <thead>
                     <tr>
                         <th>Prescription</th>
@@ -203,38 +208,38 @@
         </section>
 
         <section id="health-record">
-            <h1 class="heading">Health Record</h1>
+            <h2 class="section-heading">Health Record</h2>
             <div class="form-container">
                 <form action="/patient/update-health-record" method="POST">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="age" class="form-label">Age:</label>
+                            <label for="age" class="form-label">Age</label>
                             <input type="number" class="form-control" id="age" name="age" required>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label for="weight" class="form-label">Weight:</label>
+                            <label for="weight" class="form-label">Weight</label>
                             <input type="number" class="form-control" id="weight" name="weight" required>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="height" class="form-label">Height (cm):</label>
+                            <label for="height" class="form-label">Height (cm)</label>
                             <input type="number" class="form-control" id="height" name="height" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="gender" class="form-label">Gender</label>
+                            <select class="form-select" id="gender" name="gender" required>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
                         </div>
                     </div>
                     <div class="mb-3">
-                        <label for="gender" class="form-label">Gender:</label>
-                        <select class="form-select" id="gender" name="gender" required>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="allergies" class="form-label">Known Allergies:</label>
+                        <label for="allergies" class="form-label">Known Allergies</label>
                         <textarea class="form-control" id="allergies" name="allergies" required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-success">Update Record</button>
+                    <button type="submit" class="btn btn-success w-100">Update Record</button>
                 </form>
             </div>
         </section>
