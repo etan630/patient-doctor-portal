@@ -1,101 +1,176 @@
 if (process.env.NODE_ENV !== "production") {
-    require("dotenv").config()
+    require("dotenv").config();
 }
 
 // Important Libraries
-const express = require("express")
-const app = express()
-const bcrypt = require("bcrypt") // importing bcrypt package
-const passport = require("passport")
-const initializePassport = require("./passport-config")
-const flash = require("express-flash")
-const session = require("express-session")
-const methodOverride = require("method-override")
+const express = require("express");
+const app = express();
+const bcrypt = require("bcrypt"); // importing bcrypt package
+const passport = require("passport");
+const initializePassport = require("./passport-config");
+const flash = require("express-flash");
+const session = require("express-session");
+const methodOverride = require("method-override");
+const { v4: uuidv4 } = require('uuid'); // To generate unique IDs
 
 initializePassport(
     passport, 
     email => users.find(user => user.email == email),
     id => users.find(user => user.id === id) 
-    )
+);
 
-const users = []
+const users = [];
 
-app.use(express.urlencoded({extended: false}))
-app.use(flash())
+app.use(express.urlencoded({ extended: false }));
+app.use(flash());
 app.use(session({
     secret: process.env.SESSION_SECRET,
-    resave: false, // won't resave the session wariable if nothing is changed
+    resave: false, // won't resave the session variable if nothing is changed
     saveUninitialized: false
-}))
-app.use(passport.initialize())
-app.use(passport.session())
-app.use(methodOverride("_method"))
+}));
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(methodOverride("_method"));
+app.set('view engine', 'ejs');
+
+// In-memory data storage
+let patients = [];
+let doctors = [];
+let distributors = [];
+
+// Patient Routes
+app.post('/patient/request-refill', (req, res) => {
+    const { name, prescription, quantity, distributor } = req.body;
+    let patient = patients.find(p => p.name === name);
+
+    if (!patient) {
+        patient = { name, requests: [], healthRecord: {} };
+        patients.push(patient);
+    }
+
+    patient.requests.push({ id: uuidv4(), prescription, quantity, distributor, status: 'Pending' });
+    res.redirect('/patient');
+});
+
+app.post('/patient/update-health-record', (req, res) => {
+    const { name, age, weight, height, gender, allergies } = req.body;
+    let patient = patients.find(p => p.name === name);
+
+    if (!patient) {
+        patient = { name, requests: [], healthRecord: {} };
+        patients.push(patient);
+    }
+
+    patient.healthRecord = { age, weight, height, gender, allergies };
+    res.redirect('/patient');
+});
+
+// Doctor Routes
+app.post('/doctor/manage-patients', (req, res) => {
+    const { doctorId, patientIds } = req.body;
+    let doctor = doctors.find(d => d.id === doctorId);
+
+    if (doctor) {
+        doctor.patients = patientIds.map(id => patients.find(p => p.name === id));
+        res.redirect('/doctor');
+    } else {
+        res.status(404).send('Doctor not found');
+    }
+});
+
+app.post('/doctor/update-request-status', (req, res) => {
+    const { requestId, status, patientName } = req.body;
+    let patient = patients.find(p => p.name === patientName);
+
+    if (patient) {
+        let request = patient.requests.find(r => r.id === requestId);
+        if (request) {
+            request.status = status;
+            res.redirect('/doctor');
+        } else {
+            res.status(404).send('Request not found');
+        }
+    } else {
+        res.status(404).send('Patient not found');
+    }
+});
+
+app.post('/doctor/add-distributor', (req, res) => {
+    const { name, address, phone, email, contactPerson } = req.body;
+    distributors.push({ name, address, phone, email, contactPerson });
+    res.redirect('/doctor');
+});
+
+// Render pages
+app.get('/doctor', checkAuthenticated, (req, res) => {
+    res.render('doctor', {
+        name: req.user.name,
+        doctorId: req.user.id,
+        patients: patients,
+        distributors: distributors
+    });
+});
+
+app.get('/patient', checkAuthenticated, (req, res) => {
+    res.render('patient', { name: req.user.name, patients });
+});
+
+app.get('/login', checkNotAuthenticated, (req, res) => {
+    res.render("login.ejs");
+});
+
+app.get('/register', checkNotAuthenticated, (req, res) => {
+    res.render("register.ejs");
+});
 
 // configuring the login post functionality
 app.post("/login", checkNotAuthenticated, (req, res, next) => {
     passport.authenticate("local", (err, user, info) => {
         if (err) {
-            return next(err)
+            return next(err);
         }
         if (!user) {
-            req.flash('error', "Invalid email or password")
-            return res.redirect("/login")
+            req.flash('error', "Invalid email or password");
+            return res.redirect("/login");
         }
         if (user.userType !== req.body.userRole) {
             // User role does not match the userType
-            req.flash('error', "Login doesn't exist under user type")
-            return res.redirect("/login")
+            req.flash('error', "Login doesn't exist under user type");
+            return res.redirect("/login");
         }
         req.logIn(user, (err) => {
             if (err) {
-                return next(err)
+                return next(err);
             }
             if (user.userType === "doctor") {
-                return res.redirect("/doctor")
+                return res.redirect("/doctor");
             } else if (user.userType === "patient") {
-                return res.redirect("/patient")
+                return res.redirect("/patient");
             } else {
-                return res.redirect("/login")
+                return res.redirect("/login");
             }
-        })
-    })(req, res, next)
-})
+        });
+    })(req, res, next);
+});
 
 // configuring the register post functionality
 app.post("/register", checkNotAuthenticated, async (req, res) => {
     try {
-        const hashedPassword = await bcrypt.hash(req.body.password, 10)
+        const hashedPassword = await bcrypt.hash(req.body.password, 10);
         users.push({
             id: Date.now().toString(), // ensures same name ppl won't mess things up
             name: req.body.name,
             email: req.body.email,
             password: hashedPassword,
             userType: req.body.userRole,
-        })
+        });
         console.log(users); //display newly registered in the console
-        res.redirect("/login")
+        res.redirect("/login");
     } catch (e) {
         console.log(e);
-        res.redirect("/register")
+        res.redirect("/register");
     }
-})
-
-// Routes
-app.get('/doctor', checkAuthenticated, (req, res) =>{
-    res.render("doctor.ejs", {name: req.user.name})
-})
-
-app.get('/patient', checkAuthenticated, (req, res) => {
-    res.render("patient.ejs", {name: req.user.name})
-})
-
-app.get('/login', checkNotAuthenticated, (req, res) => {
-    res.render("login.ejs")
-})
-
-app.get('/register', checkNotAuthenticated, (req, res) => {
-    res.render("register.ejs")
-})
+});
 
 // End Routes
 
@@ -111,24 +186,26 @@ app.delete("/logout", (req, res, next) => {
             return res.redirect("/login");
         }
     });
-})
+});
 
-function checkAuthenticated(req, res, next){
-    if(req.isAuthenticated()) {
-        return next()
+function checkAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) {
+        return next();
     }
-    res.redirect("/login")
+    res.redirect("/login");
 }
 
-function checkNotAuthenticated(req, res, next){
-    if(req.isAuthenticated()) {
+function checkNotAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) {
         if (req.user.userType === "doctor") {
-            return res.redirect("/doctor")
+            return res.redirect("/doctor");
         } else if (req.user.userType === "patient") {
-            return res.redirect("/patient")
+            return res.redirect("/patient");
         }
     }
-    next()
+    next();
 }
 
-app.listen(3000)
+app.listen(3000, () => {
+    console.log('Server started on port 3000');
+});
